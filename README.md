@@ -5,9 +5,9 @@ for automotive plant use, centered on ECU flashing stations over CAN/UDS.
 Pipelines are authored directly as Numaflow `Pipeline` YAML.
 
 There's no real hardware yet, so the protocol stack is built against a
-swappable transport (`pkg/can.Bus`) and validated with a simulated ECU. See
-[docs/components.md](docs/components.md) for the full layout and how to
-extend it.
+swappable transport (`pkg/can.Bus`) and validated with a simulated ECU.
+
+**Full documentation:** https://isaiah-harville.github.io/automotive/
 
 ## Layout
 
@@ -17,7 +17,9 @@ extend it.
   UDFs, sink) built on top of `pkg/`. The pipeline intentionally mixes Go
   and Python vertices to establish that pattern.
 - `pipelines/examples/` — example `Pipeline` YAML and sample input data.
-- `docs/` — component library docs.
+- `docs/` — source for the MkDocs documentation site (architecture,
+  contracts, component library, configuration, local deployment, and a
+  readiness audit).
 
 ## Getting started
 
@@ -29,6 +31,14 @@ go test ./...
 Tests run against an in-process simulated ECU (`pkg/can/simbus` +
 `uds.FakeECU`) — no hardware or cluster required.
 
-See [docs/components.md](docs/components.md) for the component catalog, how
-to add a new UDS service or component, and the current state of real
-hardware support (not implemented yet — `pkg/can/socketcan` is a stub).
+To work on the docs site locally:
+
+```sh
+uv sync
+uv run mkdocs serve
+```
+
+See the [documentation site](https://isaiah-harville.github.io/automotive/)
+for the component catalog, how to add a new UDS service or component, and
+the current state of real hardware support (not implemented yet —
+`pkg/can/socketcan` is a stub).
