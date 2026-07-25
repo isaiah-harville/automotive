@@ -2,6 +2,7 @@
 .git
 .gitignore
 .gitattributes
+.devcontainer
 
 # Local configuration and secrets
 .env
