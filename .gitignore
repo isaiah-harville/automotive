@@ -1,0 +1,54 @@
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# Python environments and packaging output
+.venv/
+venv/
+env/
+.tox/
+.nox/
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Python test and coverage output
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Go build and test output
+bin/
+*.test
+*.out
+coverage.out
+cpu.prof
+mem.prof
+
+# Runtime and temporary files
+*.log
+tmp/
+temp/
+

@@ -5,7 +5,7 @@
     "context": ".."
   },
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:3": {
+    "ghcr.io/devcontainers/features/docker-in-docker:4.0.0": {
       "version": "latest",
       "moby": true,
       "enableNonRootDocker": true
