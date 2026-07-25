@@ -1,0 +1,88 @@
+# Example Numaflow Pipeline wiring the reference component library into a
+# minimal ECU flashing flow:
+#
+#   cansource -> udsflasher -> report-formatter -> resultsink
+#
+# cansource reads FlashJob records from a file (see
+# pipelines/examples/jobs.jsonl for a sample), udsflasher drives the UDS
+# flash sequence (against a simulated ECU by default -- see CAN_MODE below),
+# report-formatter (Python) turns the result into a readable line, and
+# resultsink logs it.
+#
+# Build/push each component image first (see docs/components.md), then:
+#   kubectl apply -f pipelines/examples/flash-basic.yaml
+#
+# There is no cluster wired up for this repo yet, so treat this as a
+# reviewed template rather than something already deployed.
+apiVersion: numaflow.numaproj.io/v1alpha1
+kind: Pipeline
+metadata:
+  name: flash-basic
+spec:
+  vertices:
+    - name: cansource
+      scale:
+        min: 1
+        max: 1
+      source:
+        udsource:
+          container:
+            image: automotive-flow/cansource:latest
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: JOBS_FILE
+                value: /etc/automotive-flow/jobs.jsonl
+            volumeMounts:
+              - name: jobs
+                mountPath: /etc/automotive-flow
+      volumes:
+        - name: jobs
+          configMap:
+            name: automotive-flow-jobs
+
+    - name: udsflasher
+      scale:
+        min: 1
+        max: 1
+      udf:
+        container:
+          image: automotive-flow/udsflasher:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            # "sim" runs against an in-process simulated ECU so this pipeline
+            # is runnable with no hardware. Set to "socketcan" (and
+            # CAN_IFACE) once a plant has a real CAN interface wired up --
+            # see pkg/can/socketcan, not implemented yet.
+            - name: CAN_MODE
+              value: sim
+            - name: TESTER_CAN_ID
+              value: "7E0"
+            - name: ECU_CAN_ID
+              value: "7E8"
+
+    - name: report-formatter
+      scale:
+        min: 1
+        max: 1
+      udf:
+        container:
+          image: automotive-flow/report-formatter:latest
+          imagePullPolicy: IfNotPresent
+
+    - name: resultsink
+      scale:
+        min: 1
+        max: 1
+      sink:
+        udsink:
+          container:
+            image: automotive-flow/resultsink:latest
+            imagePullPolicy: IfNotPresent
+
+  edges:
+    - from: cansource
+      to: udsflasher
+    - from: udsflasher
+      to: report-formatter
+    - from: report-formatter
+      to: resultsink
