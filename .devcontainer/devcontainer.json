@@ -1,0 +1,64 @@
+{
+  "name": "Automotive Numaflow",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:3": {
+      "version": "latest",
+      "moby": true,
+      "enableNonRootDocker": true
+    },
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.23"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.13"
+    },
+    "ghcr.io/devcontainers-extra/features/uv:1": {
+      "version": "0.11.32"
+    },
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {}
+  },
+  "runArgs": [
+    "--privileged"
+  ],
+  "containerEnv": {
+    "MINIKUBE_PROFILE": "automotive",
+    "UV_LINK_MODE": "copy"
+  },
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
+  "postCreateCommand": ".devcontainer/scripts/post-create.sh",
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml",
+        "ms-vscode.makefile-tools"
+      ],
+      "settings": {
+        "go.toolsManagement.autoUpdate": true,
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/components/python/report-formatter/.venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "ruff.nativeServer": "on",
+        "yaml.schemas": {
+          "kubernetes": [
+            "pipelines/**/*.yaml"
+          ]
+        }
+      }
+    }
+  }
+}
