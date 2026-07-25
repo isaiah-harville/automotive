@@ -1,0 +1,15 @@
+[project]
+name = "report-formatter"
+version = "0.1.0"
+description = "Numaflow mapper UDF that formats FlashResult JSON into a human-readable report line"
+requires-python = ">=3.13"
+dependencies = [
+    "pynumaflow>=0.14.0,<0.15",
+]
+
+[tool.hatch.build.targets.wheel]
+only-include = ["handler.py"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
