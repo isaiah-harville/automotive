@@ -1,0 +1,12 @@
+[project]
+name = "automotive-flow-docs"
+version = "0.1.0"
+description = "Repo-root tooling: the MkDocs documentation site. Component packages under components/python/* manage their own pyproject.toml/uv.lock."
+requires-python = ">=3.13"
+dependencies = [
+    "mkdocs-material>=9.5,<10",
+    "mkdocs<2",
+]
+
+[dependency-groups]
+dev = ["ruff", "ty", "yamllint"]

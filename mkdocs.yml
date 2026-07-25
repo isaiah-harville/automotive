@@ -1,0 +1,45 @@
+site_name: Automotive Flow
+site_description: A Numaflow component library for ECU flashing stations
+site_url: https://isaiah-harville.github.io/automotive/
+repo_url: https://github.com/isaiah-harville/automotive
+repo_name: isaiah-harville/automotive
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - Overview: index.md
+  - Architecture: architecture.md
+  - Message Contracts: contracts.md
+  - Component Library: components.md
+  - Protocol Packages: protocol-packages.md
+  - Configuration: configuration.md
+  - Local Deployment: local-deployment.md
+  - Readiness Audit: readiness-audit.md
