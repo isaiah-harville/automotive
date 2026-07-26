@@ -1,8 +1,10 @@
 package uds_test
 
 import (
+	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/isaiah-harville/automotive-flow/pkg/can/simbus"
 	"github.com/isaiah-harville/automotive-flow/pkg/isotp"
@@ -70,6 +72,47 @@ func TestTransferFirmware(t *testing.T) {
 	}
 	if err := c.TransferFirmware(0x00100000, image, 0x00); err != nil {
 		t.Fatalf("TransferFirmware: %v", err)
+	}
+}
+
+func TestStartKeepAliveSendsTesterPresentUntilStopped(t *testing.T) {
+	c, ecu := newTestClient(t)
+
+	stop := c.StartKeepAlive(context.Background(), 10*time.Millisecond)
+	time.Sleep(55 * time.Millisecond)
+	stop()
+
+	count := ecu.TesterPresentCount.Load()
+	if count < 3 {
+		t.Fatalf("got %d TesterPresent requests in 55ms at a 10ms interval, want at least 3", count)
+	}
+
+	// No further ticks should arrive after stop returns.
+	time.Sleep(30 * time.Millisecond)
+	if got := ecu.TesterPresentCount.Load(); got != count {
+		t.Fatalf("TesterPresentCount changed after stop: %d -> %d", count, got)
+	}
+}
+
+func TestStartKeepAliveInterleavesWithConcurrentRequests(t *testing.T) {
+	c, ecu := newTestClient(t)
+	// Small blocks over many round trips give a fast ticker real wall-clock
+	// gaps to land in, since each block is its own channel round trip
+	// through simbus.
+	ecu.MaxBlockLength = 8
+
+	stop := c.StartKeepAlive(context.Background(), 200*time.Microsecond)
+	defer stop()
+
+	image := make([]byte, 50000)
+	for i := range image {
+		image[i] = byte(i)
+	}
+	if err := c.TransferFirmware(0x00100000, image, 0x00); err != nil {
+		t.Fatalf("TransferFirmware with concurrent keep-alive: %v", err)
+	}
+	if ecu.TesterPresentCount.Load() == 0 {
+		t.Fatal("expected at least one TesterPresent to interleave with the transfer")
 	}
 }
 

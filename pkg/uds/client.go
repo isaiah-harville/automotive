@@ -9,6 +9,7 @@ package uds
 import (
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/isaiah-harville/automotive-flow/pkg/isotp"
@@ -46,6 +47,14 @@ type Client struct {
 	// PendingTimeout bounds total time spent retrying while the ECU
 	// replies with NRC 0x78 (response pending).
 	PendingTimeout time.Duration
+
+	// wireMu serializes access to the underlying ISO-TP connection across
+	// concurrent callers of Request, e.g. a StartKeepAlive goroutine
+	// racing with the goroutine driving a multi-block transfer. It is
+	// held only for the duration of a single request/response exchange,
+	// not across a whole service call, so a keep-alive tick only ever
+	// lands in the gap between two other requests.
+	wireMu sync.Mutex
 }
 
 // NewClient wraps an ISO-TP connection already addressed to a specific ECU.
@@ -61,6 +70,9 @@ func NewClient(conn *isotp.Conn) *Client {
 // response payload with the echoed SID+0x40 stripped off. It transparently
 // retries while the ECU reports "response pending".
 func (c *Client) Request(sid byte, payload []byte) ([]byte, error) {
+	c.wireMu.Lock()
+	defer c.wireMu.Unlock()
+
 	req := make([]byte, 1+len(payload))
 	req[0] = sid
 	copy(req[1:], payload)

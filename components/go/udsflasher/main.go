@@ -36,6 +36,11 @@ import (
 	"github.com/isaiah-harville/automotive-flow/pkg/uds"
 )
 
+// keepAliveInterval is how often TesterPresent is sent during
+// TransferFirmware to hold the diagnostic session open. Well under the
+// typical 5s S3 timeout, with margin for jitter.
+const keepAliveInterval = 2 * time.Second
+
 type flasher struct {
 	mu     sync.Mutex
 	client *uds.Client
@@ -150,8 +155,16 @@ func (fl *flasher) doFlash(job flowtypes.FlashJob) error {
 	if err := c.SecurityAccess(securityLevel, uds.XORKeyGenerator{Mask: keyMask}); err != nil {
 		return fmt.Errorf("security access: %w", err)
 	}
-	if err := c.TransferFirmware(uint32(memAddr), firmware, 0x00); err != nil {
-		return fmt.Errorf("transfer firmware: %w", err)
+
+	// A multi-block transfer of a large image can leave gaps between
+	// TransferData requests longer than the ECU's S3 (session timeout)
+	// window; keep the programming session alive with periodic
+	// TesterPresent requests for the duration of the transfer.
+	stopKeepAlive := c.StartKeepAlive(context.Background(), keepAliveInterval)
+	transferErr := c.TransferFirmware(uint32(memAddr), firmware, 0x00)
+	stopKeepAlive()
+	if transferErr != nil {
+		return fmt.Errorf("transfer firmware: %w", transferErr)
 	}
 	if err := c.ECUReset(uds.ResetHard); err != nil {
 		return fmt.Errorf("ecu reset: %w", err)
