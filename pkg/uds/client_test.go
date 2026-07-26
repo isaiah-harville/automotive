@@ -156,6 +156,48 @@ func TestStopRoutine(t *testing.T) {
 	}
 }
 
+func TestReadDataByIdentifier(t *testing.T) {
+	c, ecu := newTestClient(t)
+	const vinDataID = 0xF190
+	ecu.DataRecords = map[uint16][]byte{vinDataID: []byte("1FA6P8CF0")}
+
+	got, err := c.ReadDataByIdentifier(vinDataID)
+	if err != nil {
+		t.Fatalf("ReadDataByIdentifier: %v", err)
+	}
+	if string(got) != "1FA6P8CF0" {
+		t.Fatalf("got %q, want %q", got, "1FA6P8CF0")
+	}
+}
+
+func TestReadDataByIdentifierUnknownReturnsEmpty(t *testing.T) {
+	c, _ := newTestClient(t)
+
+	got, err := c.ReadDataByIdentifier(0x0102)
+	if err != nil {
+		t.Fatalf("ReadDataByIdentifier: %v", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("got %x, want none", got)
+	}
+}
+
+func TestWriteThenReadDataByIdentifier(t *testing.T) {
+	c, _ := newTestClient(t)
+	const calDataID = 0xF1A0
+
+	if err := c.WriteDataByIdentifier(calDataID, []byte{0x01, 0x02, 0x03}); err != nil {
+		t.Fatalf("WriteDataByIdentifier: %v", err)
+	}
+	got, err := c.ReadDataByIdentifier(calDataID)
+	if err != nil {
+		t.Fatalf("ReadDataByIdentifier: %v", err)
+	}
+	if string(got) != "\x01\x02\x03" {
+		t.Fatalf("got %x, want 010203", got)
+	}
+}
+
 func TestReadAndClearDTCs(t *testing.T) {
 	c, ecu := newTestClient(t)
 	ecu.DTCs = []byte{0x01, 0x23, 0x45, 0x08}

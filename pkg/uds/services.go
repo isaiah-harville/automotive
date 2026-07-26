@@ -36,6 +36,8 @@ const (
 	sidTesterPresent            = 0x3E
 	sidReadDTCInformation       = 0x19
 	sidClearDiagnosticInfo      = 0x14
+	sidReadDataByIdentifier     = 0x22
+	sidWriteDataByIdentifier    = 0x2E
 )
 
 // RoutineControl sub-functions (ISO 14229-1 Table 320).
@@ -269,6 +271,29 @@ func (c *Client) StopRoutine(routineID uint16, optionRecord []byte) (RoutineResu
 // whether a checksum verification passed) without stopping it.
 func (c *Client) RequestRoutineResults(routineID uint16) (RoutineResult, error) {
 	return c.routineControl(RoutineControlRequestResults, routineID, nil)
+}
+
+// ReadDataByIdentifier reads the data record for a data identifier (e.g.
+// VIN, ECU part number, calibration data) outside of a flash sequence.
+func (c *Client) ReadDataByIdentifier(dataID uint16) ([]byte, error) {
+	payload := []byte{byte(dataID >> 8), byte(dataID)}
+	resp, err := c.Request(sidReadDataByIdentifier, payload)
+	if err != nil {
+		return nil, err
+	}
+	if len(resp) < 2 {
+		return nil, ErrShortResponse
+	}
+	return resp[2:], nil
+}
+
+// WriteDataByIdentifier writes record as the data for a data identifier.
+func (c *Client) WriteDataByIdentifier(dataID uint16, record []byte) error {
+	payload := make([]byte, 0, 2+len(record))
+	payload = append(payload, byte(dataID>>8), byte(dataID))
+	payload = append(payload, record...)
+	_, err := c.Request(sidWriteDataByIdentifier, payload)
+	return err
 }
 
 // ReadDTCByStatusMask reads stored DTCs matching a status mask (subfunction
