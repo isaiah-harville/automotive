@@ -1,9 +1,11 @@
 package uds
 
 import (
+	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"time"
 )
 
 // Diagnostic session types (ISO 14229-1 Table 24).
@@ -53,6 +55,40 @@ func (c *Client) ECUReset(resetType byte) error {
 func (c *Client) TesterPresent() error {
 	_, err := c.Request(sidTesterPresent, []byte{0x00})
 	return err
+}
+
+// StartKeepAlive sends TesterPresent every interval until ctx is canceled,
+// to hold a non-default diagnostic session open across a long-running
+// operation (e.g. TransferFirmware) that may otherwise leave gaps longer
+// than the ECU's S3 timeout between requests. It runs in its own goroutine
+// and returns a stop function that blocks until that goroutine has exited;
+// callers should defer stop() around the operation being kept alive.
+//
+// It is safe to call concurrently with other Client methods: Request
+// serializes access to the underlying connection, so a keep-alive tick
+// simply queues behind whatever request is already in flight.
+func (c *Client) StartKeepAlive(ctx context.Context, interval time.Duration) (stop func()) {
+	ctx, cancel := context.WithCancel(ctx)
+	done := make(chan struct{})
+
+	go func() {
+		defer close(done)
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				_ = c.TesterPresent()
+			}
+		}
+	}()
+
+	return func() {
+		cancel()
+		<-done
+	}
 }
 
 // SecurityAccess performs a seed/key exchange to unlock the given security

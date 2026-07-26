@@ -1,6 +1,7 @@
 package uds
 
 import (
+	"sync/atomic"
 	"time"
 
 	"github.com/isaiah-harville/automotive-flow/pkg/isotp"
@@ -19,6 +20,10 @@ type FakeECU struct {
 	MaxBlockLength int    // reported by RequestDownload; default 64
 	DTCs           []byte // canned ReadDTCByStatusMask response payload
 	unlocked       bool
+
+	// TesterPresentCount counts received TesterPresent (0x3E) requests,
+	// for tests asserting on keep-alive behavior.
+	TesterPresentCount atomic.Int32
 
 	stop chan struct{}
 }
@@ -85,6 +90,7 @@ func (e *FakeECU) handle(req []byte) []byte {
 		return positive(sid, body[0])
 
 	case sidTesterPresent:
+		e.TesterPresentCount.Add(1)
 		return positive(sid, 0x00)
 
 	case sidSecurityAccess:
