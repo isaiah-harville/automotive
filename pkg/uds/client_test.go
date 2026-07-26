@@ -6,10 +6,23 @@ import (
 	"testing"
 	"time"
 
+	"github.com/isaiah-harville/automotive-flow/pkg/can"
 	"github.com/isaiah-harville/automotive-flow/pkg/can/simbus"
 	"github.com/isaiah-harville/automotive-flow/pkg/isotp"
 	"github.com/isaiah-harville/automotive-flow/pkg/uds"
 )
+
+// newRawTestClient returns a Client plus the raw ISO-TP connection an ECU
+// side would use, and the underlying tester-side can.Bus, for tests that
+// need to script exact response bytes or wire-level failures that FakeECU
+// doesn't produce.
+func newRawTestClient(t *testing.T) (*uds.Client, *isotp.Conn, can.Bus) {
+	t.Helper()
+	a, b := simbus.NewPair()
+	testerConn := isotp.NewConn(a, testerID, ecuID)
+	ecuConn := isotp.NewConn(b, ecuID, testerID)
+	return uds.NewClient(testerConn), ecuConn, a
+}
 
 const (
 	testerID = 0x7E0
@@ -113,6 +126,95 @@ func TestStartKeepAliveInterleavesWithConcurrentRequests(t *testing.T) {
 	}
 	if ecu.TesterPresentCount.Load() == 0 {
 		t.Fatal("expected at least one TesterPresent to interleave with the transfer")
+	}
+}
+
+func TestRequestSendErrorOnClosedBus(t *testing.T) {
+	c, _, testerBus := newRawTestClient(t)
+	if err := testerBus.Close(); err != nil {
+		t.Fatalf("closing tester bus: %v", err)
+	}
+
+	if err := c.DiagnosticSessionControl(uds.SessionDefault); !errors.Is(err, can.ErrClosed) {
+		t.Fatalf("got %v, want an error wrapping can.ErrClosed", err)
+	}
+}
+
+func TestRequestTimesOutWithNoResponder(t *testing.T) {
+	c, _, _ := newRawTestClient(t)
+	c.ResponseTimeout = 20 * time.Millisecond
+	c.PendingTimeout = 20 * time.Millisecond
+
+	if err := c.DiagnosticSessionControl(uds.SessionDefault); !errors.Is(err, can.ErrTimeout) {
+		t.Fatalf("got %v, want an error wrapping can.ErrTimeout", err)
+	}
+}
+
+func TestRequestMalformedNegativeResponse(t *testing.T) {
+	c, ecuConn, _ := newRawTestClient(t)
+	go func() {
+		if _, err := ecuConn.Recv(time.Second); err != nil {
+			return
+		}
+		_ = ecuConn.Send([]byte{0x7F, 0x10}) // missing the NRC byte
+	}()
+
+	if err := c.DiagnosticSessionControl(uds.SessionDefault); !errors.Is(err, uds.ErrShortResponse) {
+		t.Fatalf("got %v, want uds.ErrShortResponse", err)
+	}
+}
+
+func TestRequestUnexpectedResponseSID(t *testing.T) {
+	c, ecuConn, _ := newRawTestClient(t)
+	go func() {
+		req, err := ecuConn.Recv(time.Second)
+		if err != nil {
+			return
+		}
+		// Positive-response SID for a different request than the one sent.
+		_ = ecuConn.Send([]byte{req[0] + 0x41, 0x00})
+	}()
+
+	err := c.DiagnosticSessionControl(uds.SessionDefault)
+	if err == nil {
+		t.Fatal("expected an error for a mismatched response SID, got nil")
+	}
+}
+
+func TestRequestPendingRetriesUntilDeadlineExceeded(t *testing.T) {
+	c, ecuConn, _ := newRawTestClient(t)
+	c.ResponseTimeout = 10 * time.Millisecond
+	c.PendingTimeout = 30 * time.Millisecond
+
+	stop := make(chan struct{})
+	t.Cleanup(func() { close(stop) })
+	go func() {
+		// Real UDS ECUs send unsolicited 0x78 "pending" responses on their
+		// own timer while the tester waits - the tester never resends the
+		// original request, so the responder must not wait for one either.
+		req, err := ecuConn.Recv(time.Second)
+		if err != nil {
+			return
+		}
+		ticker := time.NewTicker(5 * time.Millisecond)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-stop:
+				return
+			case <-ticker.C:
+				_ = ecuConn.Send([]byte{0x7F, req[0], uds.NRCRequestCorrectlyReceivedResponsePending})
+			}
+		}
+	}()
+
+	err := c.DiagnosticSessionControl(uds.SessionDefault)
+	var nre *uds.NegativeResponseError
+	if !errors.As(err, &nre) {
+		t.Fatalf("got %v, want a *NegativeResponseError", err)
+	}
+	if nre.NRC != uds.NRCRequestCorrectlyReceivedResponsePending {
+		t.Fatalf("got NRC 0x%02X, want 0x%02X", nre.NRC, uds.NRCRequestCorrectlyReceivedResponsePending)
 	}
 }
 
