@@ -27,6 +27,13 @@ type FakeECU struct {
 	// zero-length results.
 	RoutineResults map[uint16][]byte
 
+	// DataRecords backs ReadDataByIdentifier/WriteDataByIdentifier: reads
+	// return whatever is stored under a data identifier (zero-length if
+	// absent), and writes overwrite it. Only the responder goroutine
+	// touches this map, so it's safe to pre-populate before starting a
+	// test but not to read/write concurrently from a test goroutine.
+	DataRecords map[uint16][]byte
+
 	// TesterPresentCount counts received TesterPresent (0x3E) requests,
 	// for tests asserting on keep-alive behavior.
 	TesterPresentCount atomic.Int32
@@ -124,6 +131,24 @@ func (e *FakeECU) handle(req []byte) []byte {
 		subFunction, routineID := body[0], uint16(body[1])<<8|uint16(body[2])
 		result := e.RoutineResults[routineID]
 		return positive(sid, append([]byte{subFunction, body[1], body[2]}, result...)...)
+
+	case sidReadDataByIdentifier:
+		if len(body) < 2 {
+			return negative(sid, NRCRequestOutOfRange)
+		}
+		dataID := uint16(body[0])<<8 | uint16(body[1])
+		return positive(sid, append([]byte{body[0], body[1]}, e.DataRecords[dataID]...)...)
+
+	case sidWriteDataByIdentifier:
+		if len(body) < 2 {
+			return negative(sid, NRCRequestOutOfRange)
+		}
+		dataID := uint16(body[0])<<8 | uint16(body[1])
+		if e.DataRecords == nil {
+			e.DataRecords = make(map[uint16][]byte)
+		}
+		e.DataRecords[dataID] = append([]byte(nil), body[2:]...)
+		return positive(sid, body[0], body[1])
 
 	case sidRequestDownload:
 		mbl := e.MaxBlockLength

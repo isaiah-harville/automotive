@@ -52,6 +52,8 @@ wrapper around `Request` for one service:
 | `RequestTransferExit` | 0x37 | End the transfer |
 | `TesterPresent` | 0x3E | Keep a non-default session alive |
 | `StartRoutine` / `StopRoutine` / `RequestRoutineResults` | 0x31 | Run ECU routines (erase-before-flash, checksum verification, etc.) |
+| `ReadDataByIdentifier` | 0x22 | Read a data record (VIN, part number, calibration data, ...) |
+| `WriteDataByIdentifier` | 0x2E | Write a data record |
 | `ReadDTCByStatusMask` | 0x19 | Read stored DTCs |
 | `ClearDiagnosticInformation` | 0x14 | Clear DTCs |
 
