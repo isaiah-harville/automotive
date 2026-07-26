@@ -1,5 +1,5 @@
 {
-  "name": "Automotive Numaflow",
+  "name": "Automotive",
   "build": {
     "dockerfile": "Dockerfile",
     "context": "..",
@@ -38,7 +38,6 @@
     "storage": "32gb"
   },
   "postCreateCommand": ".devcontainer/scripts/post-create.sh",
-  "remoteUser": "vscode",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -54,9 +53,7 @@
       ],
       "settings": {
         "go.toolsManagement.autoUpdate": true,
-        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/components/python/report-formatter/.venv/bin/python",
-        "python.terminal.activateEnvironment": true,
-        "ruff.nativeServer": "on",
+        "python.terminal.activateEnvironment": false,
         "yaml.schemas": {
           "kubernetes": [
             "pipelines/**/*.yaml"
