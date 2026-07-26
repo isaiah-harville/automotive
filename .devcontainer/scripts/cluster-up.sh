@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+repo_root="$(git rev-parse --show-toplevel)"
+
+# Isolate this cluster's kubeconfig from the caller's real ~/.kube/config so
+# running this script (in the devcontainer or, accidentally, on the host)
+# never merges in a new context or flips someone's current-context out from
+# under them. See docs/local-deployment.md.
+export KUBECONFIG="${repo_root}/.devcontainer/.kube/config"
+mkdir -p "$(dirname "${KUBECONFIG}")"
+
 profile="${MINIKUBE_PROFILE:-automotive}"
 cpus="${MINIKUBE_CPUS:-4}"
 memory="${MINIKUBE_MEMORY:-8192}"
@@ -47,5 +56,7 @@ kubectl apply \
 printf '%s\n' \
   "Local cluster '${profile}' is ready." \
   "Numaflow ${numaflow_version} is installed with the default JetStream buffer." \
-  "Deploy this project with .devcontainer/scripts/deploy-local.sh."
+  "Its kubeconfig is isolated at ${KUBECONFIG} - it will not touch ~/.kube/config." \
+  "Deploy this project with .devcontainer/scripts/deploy-local.sh." \
+  "To use kubectl/minikube against it directly: export KUBECONFIG=\"${KUBECONFIG}\""
 

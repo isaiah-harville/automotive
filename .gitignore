@@ -52,3 +52,6 @@ mem.prof
 *.log
 tmp/
 temp/
+
+# Isolated local-cluster kubeconfig (see .devcontainer/scripts/cluster-up.sh)
+.devcontainer/.kube/

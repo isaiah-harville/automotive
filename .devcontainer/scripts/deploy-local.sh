@@ -2,6 +2,11 @@
 set -euo pipefail
 
 repo_root="$(git rev-parse --show-toplevel)"
+
+# Must match the KUBECONFIG cluster-up.sh created - keeps this script off the
+# caller's real ~/.kube/config too.
+export KUBECONFIG="${repo_root}/.devcontainer/.kube/config"
+
 profile="${MINIKUBE_PROFILE:-automotive}"
 
 if ! minikube status --profile "${profile}" >/dev/null 2>&1; then

@@ -16,6 +16,26 @@ create, `.devcontainer/scripts/post-create.sh` runs `go mod download` and
 The Minikube cluster itself is **not** created automatically — it needs at
 least 4 CPUs and 8 GB memory, so it's opt-in.
 
+## Kubeconfig isolation
+
+Both `cluster-up.sh` and `deploy-local.sh` set `KUBECONFIG` to
+`.devcontainer/.kube/config` (gitignored) before touching `kubectl` or
+`minikube`. This is deliberate: `minikube start`/`minikube profile` write
+into whatever kubeconfig is active and switch its `current-context`, which
+would otherwise silently repoint your shell's `kubectl` at this throwaway
+cluster — or merge a new context into a kubeconfig you didn't expect, if
+these scripts are ever run outside the devcontainer. With `KUBECONFIG`
+scoped to the repo, none of that touches `~/.kube/config`, so your other
+clusters and contexts are never affected, and `minikube delete --profile
+automotive` cleans up completely by just deleting that file along with the
+profile.
+
+To point your own `kubectl`/`minikube` at this cluster directly:
+
+```sh
+export KUBECONFIG=".devcontainer/.kube/config"
+```
+
 ## Bring up the cluster
 
 ```sh
