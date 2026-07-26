@@ -51,12 +51,16 @@ wrapper around `Request` for one service:
 | `TransferData` | 0x36 | Send one block of firmware |
 | `RequestTransferExit` | 0x37 | End the transfer |
 | `TesterPresent` | 0x3E | Keep a non-default session alive |
+| `StartRoutine` / `StopRoutine` / `RequestRoutineResults` | 0x31 | Run ECU routines (erase-before-flash, checksum verification, etc.) |
 | `ReadDTCByStatusMask` | 0x19 | Read stored DTCs |
 | `ClearDiagnosticInformation` | 0x14 | Clear DTCs |
 
 `TransferFirmware` composes `RequestDownload` → `TransferData`* →
 `RequestTransferExit` into one call that chunks a firmware image per the
 ECU's reported max block length — this is what `udsflasher` actually calls.
+It doesn't call `StartRoutine` itself; a real flash sequence built around
+it needs to run the ECU's erase and checksum-verification routines
+(routine IDs are ECU-specific) around that call.
 
 ### SecurityAccess and `KeyGenerator`
 
