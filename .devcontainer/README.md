@@ -18,6 +18,11 @@ default JetStream inter-step buffer. `deploy-local.sh` builds all component
 images directly into that cluster, so a plant does not need a central image
 registry for local operation.
 
+Both scripts scope `KUBECONFIG` to `.devcontainer/.kube/config` (gitignored)
+instead of the default `~/.kube/config`, so they never touch or switch the
+current-context of any kubeconfig you already have — see [Local
+Deployment](../docs/local-deployment.md#kubeconfig-isolation).
+
 Useful commands:
 
 ```sh
