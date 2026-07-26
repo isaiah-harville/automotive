@@ -1,0 +1,21 @@
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gosec
+    - bodyclose
+    - unconvert
+    - misspell
+  settings:
+    gosec:
+      excludes:
+        - G115 # int/uint conversions between explicitly-sized types are load-bearing throughout pkg/isotp and pkg/uds
+  exclusions:
+    presets:
+      - std-error-handling
