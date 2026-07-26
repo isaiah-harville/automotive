@@ -36,19 +36,21 @@ The local cluster is deliberately created on demand because it needs at
 least four CPUs and 8 GB of memory:
 
 ```sh
-.devcontainer/scripts/cluster-up.sh
-.devcontainer/scripts/deploy-local.sh
+scripts/cluster.sh start
+scripts/deploy-local.sh
 ```
 
-`cluster-up.sh` creates an isolated Minikube cluster named `automotive`,
-enables Metrics Server, and installs the pinned Numaflow release and its
-default JetStream inter-step buffer. `deploy-local.sh` builds all component
-images directly into that cluster, so a plant does not need a central image
-registry for local operation.
+`up-cluster.sh` creates an isolated Minikube cluster named `automotive`,
+enables Metrics Server, installs the pinned Numaflow release and its
+default JetStream inter-step buffer, and starts a background port-forward
+so the Numaflow UI stays reachable at http://localhost:8443. `deploy-local.sh`
+builds all component images directly into that cluster, so a plant does not
+need a central image registry for local operation.
 
-Both scripts scope `KUBECONFIG` to `.devcontainer/.kube/config` (gitignored)
-instead of the default `~/.kube/config`, so they never touch or switch the
-current-context of any kubeconfig you already have — see [Local
+`devcontainer.json` exports `KUBECONFIG` as `.devcontainer/.kube/config`
+(gitignored) for every shell in the container, instead of the default
+`~/.kube/config`, so nothing here ever touches or switches the
+current-context of a kubeconfig on your host — see [Local
 Deployment](../docs/local-deployment.md#kubeconfig-isolation).
 
 Useful commands:
@@ -56,8 +58,9 @@ Useful commands:
 ```sh
 kubectl get pipeline,pods
 kubectl logs -l numaflow.numaproj.io/pipeline-name=flash-basic --all-containers
-minikube stop --profile automotive
-minikube delete --profile automotive
+scripts/cluster.sh status
+scripts/cluster.sh stop
+scripts/cluster.sh delete
 ```
 
 The cluster bootstrap is reproducible but not yet air-gapped: it downloads

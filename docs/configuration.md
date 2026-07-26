@@ -36,10 +36,10 @@ No configuration; logs to stdout.
 
 | Variable | Default | Used by |
 |---|---|---|
-| `MINIKUBE_PROFILE` | `automotive` | `cluster-up.sh`, `deploy-local.sh` |
-| `MINIKUBE_CPUS` | `4` | `cluster-up.sh` |
-| `MINIKUBE_MEMORY` | `8192` (MB) | `cluster-up.sh` |
-| `NUMAFLOW_VERSION` | `v1.7.5` | `cluster-up.sh`, pins the Numaflow manifests/images installed |
+| `MINIKUBE_PROFILE` | `automotive` | `up-cluster.sh`, `deploy-local.sh` |
+| `MINIKUBE_CPUS` | `4` | `up-cluster.sh` |
+| `MINIKUBE_MEMORY` | `8192` (MB) | `up-cluster.sh` |
+| `NUMAFLOW_VERSION` | `v1.7.5` | `up-cluster.sh`, pins the Numaflow manifests/images installed |
 
 See [Local Deployment](local-deployment.md) for how these scripts fit
 together.

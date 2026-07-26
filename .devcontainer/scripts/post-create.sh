@@ -11,6 +11,6 @@ uv sync --locked
 
 printf '%s\n' \
   "Development dependencies are ready." \
-  "Run .devcontainer/scripts/cluster-up.sh to create the local plant cluster." \
-  "Run .devcontainer/scripts/deploy-local.sh to build and deploy the pipeline."
+  "Run scripts/cluster.sh start to create the local plant cluster." \
+  "Run scripts/deploy-local.sh to build and deploy the pipeline."
 

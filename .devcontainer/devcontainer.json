@@ -30,7 +30,15 @@
   ],
   "containerEnv": {
     "MINIKUBE_PROFILE": "automotive",
-    "UV_LINK_MODE": "copy"
+    "UV_LINK_MODE": "copy",
+    "KUBECONFIG": "${containerWorkspaceFolder}/.devcontainer/.kube/config"
+  },
+  "forwardPorts": [8443],
+  "portsAttributes": {
+    "8443": {
+      "label": "Numaflow UI",
+      "onAutoForward": "notify"
+    }
   },
   "hostRequirements": {
     "cpus": 4,

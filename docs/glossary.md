@@ -137,7 +137,7 @@ output. `resultsink` logs each formatted report line.
 **ISB (Inter-Step Buffer)**
 The message transport Numaflow uses between vertices — this repo uses the
 default JetStream-backed ISB, installed by
-`.devcontainer/scripts/cluster-up.sh` alongside Numaflow itself.
+`scripts/up-cluster.sh` alongside Numaflow itself.
 
 **numaflow-go / pynumaflow**
 The SDKs a vertex's container uses to implement the gRPC contract Numaflow

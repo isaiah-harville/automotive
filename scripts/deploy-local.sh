@@ -3,7 +3,7 @@ set -euo pipefail
 
 repo_root="$(git rev-parse --show-toplevel)"
 
-# Must match the KUBECONFIG cluster-up.sh created - keeps this script off the
+# Must match the KUBECONFIG up-cluster.sh created - keeps this script off the
 # caller's real ~/.kube/config too.
 export KUBECONFIG="${repo_root}/.devcontainer/.kube/config"
 
@@ -12,7 +12,7 @@ profile="${MINIKUBE_PROFILE:-automotive}"
 if ! minikube status --profile "${profile}" >/dev/null 2>&1; then
   printf '%s\n' \
     "Minikube profile '${profile}' is not running." \
-    "Start it with .devcontainer/scripts/cluster-up.sh." >&2
+    "Start it with scripts/up-cluster.sh." >&2
   exit 1
 fi
 
@@ -39,5 +39,4 @@ kubectl apply --filename pipelines/examples/flash-basic.yaml
 printf '%s\n' \
   "The flash-basic pipeline has been deployed to '${profile}'." \
   "Inspect it with: kubectl get pipeline,pods" \
-  "Open the Numaflow UI with: kubectl -n numaflow-system port-forward deployment/numaflow-server 8443:8443"
-
+  "Numaflow UI: http://localhost:8443 (port-forward started by up-cluster.sh)"

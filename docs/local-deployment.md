@@ -18,19 +18,22 @@ least 4 CPUs and 8 GB memory, so it's opt-in.
 
 ## Kubeconfig isolation
 
-Both `cluster-up.sh` and `deploy-local.sh` set `KUBECONFIG` to
-`.devcontainer/.kube/config` (gitignored) before touching `kubectl` or
-`minikube`. This is deliberate: `minikube start`/`minikube profile` write
-into whatever kubeconfig is active and switch its `current-context`, which
-would otherwise silently repoint your shell's `kubectl` at this throwaway
-cluster — or merge a new context into a kubeconfig you didn't expect, if
-these scripts are ever run outside the devcontainer. With `KUBECONFIG`
-scoped to the repo, none of that touches `~/.kube/config`, so your other
-clusters and contexts are never affected, and `minikube delete --profile
-automotive` cleans up completely by just deleting that file along with the
-profile.
+`devcontainer.json` exports `KUBECONFIG` as `.devcontainer/.kube/config`
+(gitignored) via `containerEnv`, for every shell in the container — instead
+of the default `~/.kube/config`. This is deliberate: `minikube start`/
+`minikube profile` write into whatever kubeconfig is active and switch its
+`current-context`, which would otherwise silently repoint `kubectl` at this
+throwaway cluster — or merge a new context into a kubeconfig you didn't
+expect, if these scripts are ever run outside the devcontainer (`scripts/
+up-cluster.sh` and `scripts/deploy-local.sh` also set it explicitly
+themselves, so they're still safe run that way). Because it's scoped via
+`containerEnv`, this only ever affects shells inside this disposable
+container — it never touches a kubeconfig on your host, and `minikube
+delete --profile automotive` cleans up completely by just deleting that
+file along with the profile.
 
-To point your own `kubectl`/`minikube` at this cluster directly:
+Outside the devcontainer, point your own `kubectl`/`minikube` at this
+cluster directly with:
 
 ```sh
 export KUBECONFIG=".devcontainer/.kube/config"
@@ -39,18 +42,26 @@ export KUBECONFIG=".devcontainer/.kube/config"
 ## Bring up the cluster
 
 ```sh
-.devcontainer/scripts/cluster-up.sh
+scripts/cluster.sh start
 ```
 
-This creates a Minikube profile named `automotive` (isolated from any other
-local cluster you have), enables the metrics server, and installs the
-pinned Numaflow release plus its default JetStream inter-step buffer into
-the `numaflow-system` namespace.
+`scripts/cluster.sh` is a thin lifecycle wrapper (`start` / `stop` / `restart`
+/ `status` / `delete`) around the scripts below. `start` creates a Minikube
+profile named `automotive` (isolated from any other local cluster you
+have), enables the metrics server, installs the pinned Numaflow release
+plus its default JetStream inter-step buffer into the `numaflow-system`
+namespace, and starts `scripts/port-forward-numaflow.sh` in the background
+so the Numaflow UI stays reachable without a manual `kubectl port-forward`.
+`stop` stops both the Minikube profile and that port-forward; `status`
+reports on both.
+
+Under the hood, `start` just runs `scripts/up-cluster.sh` directly, which
+you can also invoke yourself.
 
 ## Deploy the example pipeline
 
 ```sh
-.devcontainer/scripts/deploy-local.sh
+scripts/deploy-local.sh
 ```
 
 This builds all four component images (`cansource`, `udsflasher`,
@@ -66,7 +77,11 @@ kubectl get pipeline,pods
 kubectl logs -l numaflow.numaproj.io/pipeline-name=flash-basic --all-containers
 ```
 
-The Numaflow UI is available via port-forward:
+The Numaflow UI is kept available at http://localhost:8443 by the
+background port-forward `up-cluster.sh` starts (see
+`scripts/port-forward-numaflow.sh`; its log is
+`.devcontainer/.kube/port-forward.log`). It retries automatically if the
+forward drops. To run it yourself instead:
 
 ```sh
 kubectl -n numaflow-system port-forward deployment/numaflow-server 8443:8443
@@ -75,13 +90,18 @@ kubectl -n numaflow-system port-forward deployment/numaflow-server 8443:8443
 ## Tear down
 
 ```sh
-minikube stop --profile automotive
-minikube delete --profile automotive
+scripts/cluster.sh stop    # or: scripts/cluster.sh delete
 ```
+
+Both stop the background port-forward too. (The raw `minikube stop
+--profile automotive` / `minikube delete --profile automotive` still work,
+but leave the port-forward loop running - it just idles, retrying every
+5s, until the cluster comes back or you kill it yourself: `kill "$(cat
+.devcontainer/.kube/port-forward.pid)"`.)
 
 ## What this isn't (yet)
 
-This bootstrap is reproducible but **not air-gapped** — `cluster-up.sh`
+This bootstrap is reproducible but **not air-gapped** — `up-cluster.sh`
 downloads the pinned Numaflow manifests and pulls its container images from
 the internet each time. A real plant packaging step (mirroring images and
 manifests locally, offline install) doesn't exist yet. Fleet management
