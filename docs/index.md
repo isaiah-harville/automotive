@@ -14,6 +14,9 @@ today.
 
 ## Where to start
 
+- **New to CAN/UDS or Numaflow?** [Glossary](glossary.md) covers the
+  terminology used throughout these docs, from CAN frames up through UDS
+  services and Numaflow's pipeline/vertex model.
 - **New to the project?** Read [Architecture](architecture.md) for how the
   pieces fit together, then [Component Library](components.md) for the
   catalog of what's built.

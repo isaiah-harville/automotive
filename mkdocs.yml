@@ -36,6 +36,7 @@ markdown_extensions:
 
 nav:
   - Overview: index.md
+  - Glossary: glossary.md
   - Architecture: architecture.md
   - Message Contracts: contracts.md
   - Component Library: components.md
