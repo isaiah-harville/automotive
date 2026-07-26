@@ -20,6 +20,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # devcontainers/ci exports OCI images, which the default "docker"
+      # buildx driver can't produce - it needs the docker-container driver.
+      - uses: docker/setup-buildx-action@v3
+
       # Only main has permission to publish; PRs just build to confirm the
       # Dockerfile + features still work.
       - name: Log in to GHCR
