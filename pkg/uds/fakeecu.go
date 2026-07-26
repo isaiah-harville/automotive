@@ -21,6 +21,12 @@ type FakeECU struct {
 	DTCs           []byte // canned ReadDTCByStatusMask response payload
 	unlocked       bool
 
+	// RoutineResults maps a routine identifier to the routineStatusRecord
+	// bytes StartRoutine/StopRoutine/RequestRoutineResults should return
+	// for it. A routine with no entry returns a positive response with
+	// zero-length results.
+	RoutineResults map[uint16][]byte
+
 	// TesterPresentCount counts received TesterPresent (0x3E) requests,
 	// for tests asserting on keep-alive behavior.
 	TesterPresentCount atomic.Int32
@@ -110,6 +116,14 @@ func (e *FakeECU) handle(req []byte) []byte {
 		}
 		e.unlocked = true
 		return positive(sid, level)
+
+	case sidRoutineControl:
+		if len(body) < 3 {
+			return negative(sid, NRCRequestOutOfRange)
+		}
+		subFunction, routineID := body[0], uint16(body[1])<<8|uint16(body[2])
+		result := e.RoutineResults[routineID]
+		return positive(sid, append([]byte{subFunction, body[1], body[2]}, result...)...)
 
 	case sidRequestDownload:
 		mbl := e.MaxBlockLength

@@ -116,6 +116,46 @@ func TestStartKeepAliveInterleavesWithConcurrentRequests(t *testing.T) {
 	}
 }
 
+func TestStartRoutine(t *testing.T) {
+	c, ecu := newTestClient(t)
+	const eraseRoutineID = 0xFF00
+	ecu.RoutineResults = map[uint16][]byte{eraseRoutineID: {0x00}} // 0x00 = success
+
+	result, err := c.StartRoutine(eraseRoutineID, nil)
+	if err != nil {
+		t.Fatalf("StartRoutine: %v", err)
+	}
+	if result.RoutineID != eraseRoutineID {
+		t.Fatalf("got routine ID 0x%04X, want 0x%04X", result.RoutineID, eraseRoutineID)
+	}
+	if len(result.Data) != 1 || result.Data[0] != 0x00 {
+		t.Fatalf("got result data %x, want [0x00]", result.Data)
+	}
+}
+
+func TestRequestRoutineResultsUnknownRoutineReturnsEmptyData(t *testing.T) {
+	c, _ := newTestClient(t)
+
+	result, err := c.RequestRoutineResults(0x0203)
+	if err != nil {
+		t.Fatalf("RequestRoutineResults: %v", err)
+	}
+	if result.RoutineID != 0x0203 {
+		t.Fatalf("got routine ID 0x%04X, want 0x0203", result.RoutineID)
+	}
+	if len(result.Data) != 0 {
+		t.Fatalf("got result data %x, want none", result.Data)
+	}
+}
+
+func TestStopRoutine(t *testing.T) {
+	c, _ := newTestClient(t)
+
+	if _, err := c.StopRoutine(0x1234, []byte{0xAB}); err != nil {
+		t.Fatalf("StopRoutine: %v", err)
+	}
+}
+
 func TestReadAndClearDTCs(t *testing.T) {
 	c, ecu := newTestClient(t)
 	ecu.DTCs = []byte{0x01, 0x23, 0x45, 0x08}

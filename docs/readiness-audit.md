@@ -38,10 +38,12 @@ these items change status; treat it as load-bearing, not aspirational.
 - **Functional (broadcast) CAN addressing** — `pkg/isotp` only supports
   physical 1:1 addressing.
 - **CAN-FD** — classic 8-byte frames only.
-- **RoutineControl (0x31)** and most other UDS services beyond the ones
-  listed in [Protocol Packages](protocol-packages.md) — no erase-before-flash
-  or checksum-verification routine support yet, which most real flash
-  sequences need.
+- **`TransferFirmware` doesn't call `StartRoutine`.** `RoutineControl`
+  (0x31) exists on `Client` now, but the actual erase-before-flash /
+  checksum-verification routine IDs and calling convention are ECU-specific
+  and aren't wired into the default flash sequence yet.
+- Most other UDS services beyond the ones listed in [Protocol
+  Packages](protocol-packages.md) are still missing.
 - **Multi-station concurrency** — `udsflasher` serializes everything behind
   one mutex around one CAN connection. Running multiple physical flashing
   stations in parallel needs a partitioning strategy that doesn't exist yet.

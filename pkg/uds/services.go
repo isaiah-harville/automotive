@@ -29,12 +29,20 @@ const (
 	sidDiagnosticSessionControl = 0x10
 	sidECUReset                 = 0x11
 	sidSecurityAccess           = 0x27
+	sidRoutineControl           = 0x31
 	sidRequestDownload          = 0x34
 	sidTransferData             = 0x36
 	sidRequestTransferExit      = 0x37
 	sidTesterPresent            = 0x3E
 	sidReadDTCInformation       = 0x19
 	sidClearDiagnosticInfo      = 0x14
+)
+
+// RoutineControl sub-functions (ISO 14229-1 Table 320).
+const (
+	RoutineControlStart          = 0x01
+	RoutineControlStop           = 0x02
+	RoutineControlRequestResults = 0x03
 )
 
 // DiagnosticSessionControl requests a diagnostic session (SessionDefault,
@@ -216,6 +224,51 @@ func (c *Client) TransferFirmware(memAddr uint32, image []byte, dataFormatID byt
 		return fmt.Errorf("uds: request transfer exit: %w", err)
 	}
 	return nil
+}
+
+// RoutineResult is the ECU's response to a RoutineControl request.
+type RoutineResult struct {
+	RoutineID uint16
+	// Data is the routineStatusRecord, if any - format is
+	// routine-specific (e.g. a checksum pass/fail byte).
+	Data []byte
+}
+
+func (c *Client) routineControl(subFunction byte, routineID uint16, optionRecord []byte) (RoutineResult, error) {
+	payload := make([]byte, 0, 3+len(optionRecord))
+	payload = append(payload, subFunction, byte(routineID>>8), byte(routineID))
+	payload = append(payload, optionRecord...)
+
+	resp, err := c.Request(sidRoutineControl, payload)
+	if err != nil {
+		return RoutineResult{}, err
+	}
+	if len(resp) < 3 {
+		return RoutineResult{}, ErrShortResponse
+	}
+	return RoutineResult{
+		RoutineID: uint16(resp[1])<<8 | uint16(resp[2]),
+		Data:      resp[3:],
+	}, nil
+}
+
+// StartRoutine starts the routine identified by routineID (RoutineControl
+// subfunction 0x01) - e.g. an erase-before-flash or post-flash checksum
+// verification routine. optionRecord carries any routine-specific input
+// parameters and may be nil.
+func (c *Client) StartRoutine(routineID uint16, optionRecord []byte) (RoutineResult, error) {
+	return c.routineControl(RoutineControlStart, routineID, optionRecord)
+}
+
+// StopRoutine stops a previously started routine.
+func (c *Client) StopRoutine(routineID uint16, optionRecord []byte) (RoutineResult, error) {
+	return c.routineControl(RoutineControlStop, routineID, optionRecord)
+}
+
+// RequestRoutineResults retrieves the current results of a routine (e.g.
+// whether a checksum verification passed) without stopping it.
+func (c *Client) RequestRoutineResults(routineID uint16) (RoutineResult, error) {
+	return c.routineControl(RoutineControlRequestResults, routineID, nil)
 }
 
 // ReadDTCByStatusMask reads stored DTCs matching a status mask (subfunction
