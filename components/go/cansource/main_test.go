@@ -13,7 +13,7 @@ import (
 func writeJobsFile(t *testing.T, contents string) string {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "jobs.jsonl")
-	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatalf("writing jobs file: %v", err)
 	}
 	return path

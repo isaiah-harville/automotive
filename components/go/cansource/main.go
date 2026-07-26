@@ -23,7 +23,7 @@ type source struct {
 }
 
 func newSource(path string) (*source, error) {
-	f, err := os.Open(path)
+	f, err := os.Open(path) //nolint:gosec // path is JOBS_FILE, an operator-controlled config value, not untrusted input
 	if err != nil {
 		return nil, err
 	}
