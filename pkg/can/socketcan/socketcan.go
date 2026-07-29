@@ -1,19 +1,9 @@
-// Package socketcan will provide a can.Bus backed by a real Linux SocketCAN
-// interface (e.g. can0) for use once a plant has physical CAN hardware wired
-// up. Not implemented yet — components should be built against can.Bus and
-// can/simbus in the meantime so swapping this in later requires no changes
-// above the transport layer.
+// Package socketcan provides a can.Bus backed by a Linux SocketCAN raw
+// socket. It supports classic CAN data frames; CAN-FD and remote-transmission
+// request frames are outside the can.Bus contract.
 package socketcan
 
-import (
-	"errors"
+import "errors"
 
-	"github.com/isaiah-harville/automotive/pkg/can"
-)
-
-// Open will dial a SocketCAN interface (e.g. "can0") once hardware is
-// available. TODO: implement using golang.org/x/sys/unix AF_CAN sockets, or
-// swap in a vendor SDK for contracted flashing tools.
-func Open(iface string) (can.Bus, error) {
-	return nil, errors.New("socketcan: not implemented, no hardware target configured yet")
-}
+// ErrUnsupported is returned by Open on non-Linux hosts.
+var ErrUnsupported = errors.New("socketcan: only supported on Linux")

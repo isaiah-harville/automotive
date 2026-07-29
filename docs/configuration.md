@@ -13,7 +13,7 @@ pipeline YAML (see `pipelines/examples/flash-basic.yaml`).
 
 | Variable | Default | Notes |
 |---|---|---|
-| `CAN_MODE` | `sim` | `sim` runs against an in-process simulated ECU (`can/simbus` + `uds.FakeECU`); `socketcan` uses a real interface — **not implemented yet**, will error |
+| `CAN_MODE` | `sim` | `sim` runs against an in-process simulated ECU (`can/simbus` + `uds.FakeECU`); `socketcan` uses a real Linux SocketCAN interface |
 | `CAN_IFACE` | `can0` | Interface name, only used when `CAN_MODE=socketcan` |
 | `TESTER_CAN_ID` | `7E0` | Hex CAN arbitration ID the tester sends on |
 | `ECU_CAN_ID` | `7E8` | Hex CAN arbitration ID the ECU responds on |

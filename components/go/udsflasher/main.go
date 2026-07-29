@@ -6,9 +6,7 @@
 // CAN_MODE controls what it talks to:
 //   - "sim" (default): an in-process simulated ECU (pkg/can/simbus +
 //     uds.FakeECU), so the pipeline is runnable with no hardware.
-//   - "socketcan": a real SocketCAN interface named by CAN_IFACE. Not
-//     implemented yet (see pkg/can/socketcan) -- flashing will fail until a
-//     real transport is wired up for a given plant.
+//   - "socketcan": a real Linux SocketCAN interface named by CAN_IFACE.
 //
 // A single physical CAN bus only supports one flashing conversation at a
 // time, so Map calls are serialized with a mutex around the shared UDS

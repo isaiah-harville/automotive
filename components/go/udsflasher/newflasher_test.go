@@ -19,12 +19,12 @@ func TestNewFlasherUnknownModeErrors(t *testing.T) {
 	}
 }
 
-func TestNewFlasherSocketCANModeErrorsUntilImplemented(t *testing.T) {
+func TestNewFlasherSocketCANModeErrorsForUnavailableInterface(t *testing.T) {
 	t.Setenv("CAN_MODE", "socketcan")
-	t.Setenv("CAN_IFACE", "can0")
+	t.Setenv("CAN_IFACE", "definitely-not-a-can-interface")
 
 	if _, err := newFlasher(); err == nil {
-		t.Fatal("expected an error, since pkg/can/socketcan is not implemented yet")
+		t.Fatal("expected an error for an unavailable SocketCAN interface")
 	}
 }
 
