@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/isaiah-harville/automotive-flow/pkg/can/simbus"
-	"github.com/isaiah-harville/automotive-flow/pkg/isotp"
+	"github.com/isaiah-harville/automotive/pkg/can/simbus"
+	"github.com/isaiah-harville/automotive/pkg/isotp"
 )
 
 const (

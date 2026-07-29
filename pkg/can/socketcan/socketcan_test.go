@@ -3,7 +3,7 @@ package socketcan_test
 import (
 	"testing"
 
-	"github.com/isaiah-harville/automotive-flow/pkg/can/socketcan"
+	"github.com/isaiah-harville/automotive/pkg/can/socketcan"
 )
 
 func TestOpenReturnsNotImplementedError(t *testing.T) {
