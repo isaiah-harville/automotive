@@ -45,11 +45,27 @@ a formatted line) `resultsink`.
 | `status` | string | `"ok"` or `"error"` |
 | `error` | string | Present only when `status` is `"error"` |
 | `duration_ms` | int64 | Wall-clock time spent in the flash sequence |
+| `attempts` | int | Number of flash attempts made; `0` for input-validation failures |
 
 ```json
-{"job_id": "job-001", "ecu_id": "ecm-01", "status": "ok", "duration_ms": 42}
-{"job_id": "job-002", "ecu_id": "ecm-02", "status": "error", "error": "security access: uds: negative response to SID 0x27: NRC 0x35", "duration_ms": 8}
+{"job_id": "job-001", "ecu_id": "ecm-01", "status": "ok", "duration_ms": 42, "attempts": 1}
+{"job_id": "job-002", "ecu_id": "ecm-02", "status": "error", "error": "security access: uds: negative response to SID 0x27: NRC 0x35", "duration_ms": 8, "attempts": 1}
 ```
+
+Successful results are tagged `flash-success` and forwarded to
+`report-formatter`.
+
+## FlashDeadLetter
+
+Emitted by `udsflasher` after a permanent failure or retry exhaustion and
+tagged `flash-dead-letter`. The example pipeline routes it directly to
+`deadlettersink`, bypassing `report-formatter`.
+
+| Field | Type | Notes |
+|---|---|---|
+| `job` | FlashJob | Complete original input, suitable for operator replay |
+| `result` | FlashResult | Final error, duration, and attempt count |
+| `failed_at` | RFC 3339 timestamp | UTC time at which the job entered the dead-letter path |
 
 ## Changing a contract
 

@@ -3,6 +3,8 @@
 // resultsink), so every component -- Go or Python -- agrees on field names.
 package flowtypes
 
+import "time"
+
 // FlashJob is emitted by cansource and consumed by udsflasher.
 type FlashJob struct {
 	JobID         string `json:"job_id"`
@@ -21,4 +23,14 @@ type FlashResult struct {
 	Status     string `json:"status"` // "ok" or "error"
 	Error      string `json:"error,omitempty"`
 	DurationMS int64  `json:"duration_ms"`
+	Attempts   int    `json:"attempts"`
+}
+
+// FlashDeadLetter is emitted when a flash job cannot be completed. It keeps
+// the original job alongside the final result so an operator can inspect and
+// replay it after correcting the underlying problem.
+type FlashDeadLetter struct {
+	Job      FlashJob    `json:"job"`
+	Result   FlashResult `json:"result"`
+	FailedAt time.Time   `json:"failed_at"`
 }

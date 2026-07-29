@@ -51,8 +51,10 @@ these items change status; treat it as load-bearing, not aspirational.
 - **Multi-station concurrency** — `udsflasher` serializes everything behind
   one mutex around one CAN connection. Running multiple physical flashing
   stations in parallel needs a partitioning strategy that doesn't exist yet.
-- **Retry/dead-letter handling** — a failed flash job is reported as an
-  error once; there's no retry policy or dead-letter path.
+- **Retry persistence** — `udsflasher` performs bounded in-process retries
+  and routes exhausted jobs to a separate sink, but the example
+  `deadlettersink` only logs them. A production deployment still needs
+  durable dead-letter storage and an authenticated replay workflow.
 - **Vendor pass-thru integration (J2534 or similar)** — no design yet;
   depends on which vendor tooling a plant contract specifies.
 - **CI for Docker image builds** — CI runs `go test`/`go vet`/`gofmt` and

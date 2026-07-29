@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"os"
 	"testing"
@@ -29,7 +30,7 @@ func TestFlashSampleJobs(t *testing.T) {
 		if err := json.Unmarshal(scanner.Bytes(), &job); err != nil {
 			t.Fatalf("unmarshaling job: %v", err)
 		}
-		result := fl.flash(job)
+		result := fl.flash(context.Background(), job)
 		if result.Status != "ok" {
 			t.Fatalf("job %s: got status %q, want ok (error: %s)", job.JobID, result.Status, result.Error)
 		}

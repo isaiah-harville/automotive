@@ -1,7 +1,9 @@
 # Example Numaflow Pipeline wiring the reference component library into a
 # minimal ECU flashing flow:
 #
-#   cansource -> udsflasher -> report-formatter -> resultsink
+#                                /-> report-formatter -> resultsink
+#   cansource -> udsflasher ----<
+#                                \-> deadlettersink
 #
 # cansource reads FlashJob records from a file (see
 # pipelines/examples/jobs.jsonl for a sample), udsflasher drives the UDS
@@ -59,6 +61,10 @@ spec:
               value: "7E0"
             - name: ECU_CAN_ID
               value: "7E8"
+            - name: FLASH_MAX_ATTEMPTS
+              value: "3"
+            - name: FLASH_RETRY_BACKOFF
+              value: 1s
 
     - name: report-formatter
       scale:
@@ -79,10 +85,34 @@ spec:
             image: automotive-flow/resultsink:latest
             imagePullPolicy: IfNotPresent
 
+    - name: deadlettersink
+      scale:
+        min: 1
+        max: 1
+      sink:
+        udsink:
+          container:
+            # Dead letters contain the original FlashJob and final
+            # FlashResult so an operator can inspect and replay the job.
+            image: automotive-flow/resultsink:latest
+            imagePullPolicy: IfNotPresent
+
   edges:
     - from: cansource
       to: udsflasher
     - from: udsflasher
       to: report-formatter
+      conditions:
+        tags:
+          operator: or
+          values:
+            - flash-success
+    - from: udsflasher
+      to: deadlettersink
+      conditions:
+        tags:
+          operator: or
+          values:
+            - flash-dead-letter
     - from: report-formatter
       to: resultsink

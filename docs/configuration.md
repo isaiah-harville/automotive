@@ -17,12 +17,19 @@ pipeline YAML (see `pipelines/examples/flash-basic.yaml`).
 | `CAN_IFACE` | `can0` | Interface name, only used when `CAN_MODE=socketcan` |
 | `TESTER_CAN_ID` | `7E0` | Hex CAN arbitration ID the tester sends on |
 | `ECU_CAN_ID` | `7E8` | Hex CAN arbitration ID the ECU responds on |
+| `FLASH_MAX_ATTEMPTS` | `3` | Maximum flash attempts, including the initial attempt; valid range is 1–10 |
+| `FLASH_RETRY_BACKOFF` | `1s` | Initial delay before retrying a transient failure; doubles after each failed attempt |
 
 In `CAN_MODE=sim`, `udsflasher` starts a `uds.FakeECU` with
 `ExpectedKey = nil`, meaning **it accepts any SecurityAccess key** — that's
 correct for exercising the pipeline end-to-end without hardware, but means
 `sim` mode never actually validates a `key_mask_hex` value from a
 `FlashJob`. See [Readiness Audit](readiness-audit.md).
+
+Input-validation failures, ECU negative responses, and a closed CAN bus are
+not retried. Other transport/protocol failures use the bounded retry policy.
+Jobs that still fail are routed to the `deadlettersink` vertex with the
+original job attached.
 
 ## `report-formatter`
 
