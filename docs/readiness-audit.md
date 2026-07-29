@@ -17,15 +17,19 @@ these items change status; treat it as load-bearing, not aspirational.
   `flash()` function is integration-tested against the actual sample
   fixture (`pipelines/examples/jobs.jsonl`), not just unit-tested in
   isolation.
+- **Linux SocketCAN transport** (`pkg/can/socketcan`) — binds an `AF_CAN`
+  raw socket to a named interface and sends/receives classic CAN frames.
+  Frame encoding and error paths are unit-tested; live hardware validation
+  is still outstanding.
 
 ## Simulated, not real
 
 - **No real CAN hardware anywhere.** Every test and the default pipeline
   configuration (`CAN_MODE=sim`) run against `can/simbus`, an in-process
   loopback — not a real bus, not real electrical/timing behavior.
-- **`pkg/can/socketcan.Open` is a stub.** It compiles and returns an error
-  unconditionally. `CAN_MODE=socketcan` in the example pipeline will fail
-  until this is implemented.
+- **SocketCAN has not been exercised against real CAN hardware.** The
+  transport is implemented and can target Linux `can0`/`vcan0` interfaces,
+  but current automated tests do not validate electrical or ECU behavior.
 - **SecurityAccess key exchange is not a real security algorithm.**
   `uds.XORKeyGenerator` XORs the seed with a fixed mask, and in
   `CAN_MODE=sim`, `udsflasher`'s `FakeECU` is configured with

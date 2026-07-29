@@ -52,7 +52,7 @@ spec:
             # "sim" runs against an in-process simulated ECU so this pipeline
             # is runnable with no hardware. Set to "socketcan" (and
             # CAN_IFACE) once a plant has a real CAN interface wired up --
-            # see pkg/can/socketcan, not implemented yet.
+            # see pkg/can/socketcan; this requires a Linux CAN interface.
             - name: CAN_MODE
               value: sim
             - name: TESTER_CAN_ID

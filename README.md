@@ -40,5 +40,5 @@ uv run mkdocs serve
 
 See the [documentation site](https://isaiah-harville.github.io/automotive/)
 for the component catalog, how to add a new UDS service or component, and
-the current state of real hardware support (not implemented yet —
-`pkg/can/socketcan` is a stub).
+the current state of hardware support. `pkg/can/socketcan` provides Linux
+SocketCAN access, though it has not yet been validated against a real ECU.

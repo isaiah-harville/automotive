@@ -5,7 +5,7 @@
 ```
 pkg/can      transport-agnostic CAN bus (the Bus interface)
   simbus       in-process simulated bus + a scriptable FakeECU
-  socketcan    real Linux SocketCAN — not implemented yet, stub only
+  socketcan    real Linux SocketCAN transport
 pkg/isotp    ISO-TP (ISO 15765-2) segmentation/reassembly over can.Bus
 pkg/uds      UDS (ISO 14229) client built on pkg/isotp
 components/  Numaflow vertices (source/UDF/sink) that call into pkg/
@@ -18,7 +18,7 @@ Each layer depends only on the interface below it:
 - Components depend on `pkg/uds` (and occasionally `pkg/can` directly, to
   choose a transport at startup) and the numaflow-go / pynumaflow SDKs.
 
-This means swapping `can/simbus` for `can/socketcan` (once implemented), or
+This means swapping `can/simbus` for `can/socketcan`, or
 for a vendor pass-thru driver under a new `pkg/can/<vendor>` package,
 requires no changes to `pkg/isotp` or `pkg/uds` — only to whatever chooses
 the transport at the component's startup (see `udsflasher`'s `CAN_MODE`

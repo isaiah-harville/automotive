@@ -14,9 +14,9 @@ on: `Send(Frame) error`, `Recv(deadline) (Frame, error)`, `Close() error`.
   two ends of one CAN segment, where anything sent on one side arrives on
   the other. This is what makes the rest of the stack testable without
   hardware.
-- **`pkg/can/socketcan`** — intended to wrap a real Linux SocketCAN
-  interface. `Open(iface)` currently just returns an error; not implemented
-  yet.
+- **`pkg/can/socketcan`** — wraps a real Linux SocketCAN interface using an
+  `AF_CAN` raw socket. `Open(iface)` binds to interfaces such as `can0` or
+  `vcan0`; non-Linux hosts return `socketcan.ErrUnsupported`.
 
 ## `pkg/isotp`
 
