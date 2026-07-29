@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/isaiah-harville/automotive-flow/components/go/flowtypes"
+	"github.com/isaiah-harville/automotive/components/go/flowtypes"
 )
 
 func TestFlashSampleJobs(t *testing.T) {

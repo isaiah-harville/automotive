@@ -1,4 +1,4 @@
-module github.com/isaiah-harville/automotive-flow
+module github.com/isaiah-harville/automotive
 
 go 1.23
 

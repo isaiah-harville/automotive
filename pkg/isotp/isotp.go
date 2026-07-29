@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/isaiah-harville/automotive-flow/pkg/can"
+	"github.com/isaiah-harville/automotive/pkg/can"
 )
 
 const (

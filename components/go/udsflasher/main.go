@@ -28,12 +28,12 @@ import (
 
 	"github.com/numaproj/numaflow-go/pkg/mapper"
 
-	"github.com/isaiah-harville/automotive-flow/components/go/flowtypes"
-	"github.com/isaiah-harville/automotive-flow/pkg/can"
-	"github.com/isaiah-harville/automotive-flow/pkg/can/simbus"
-	"github.com/isaiah-harville/automotive-flow/pkg/can/socketcan"
-	"github.com/isaiah-harville/automotive-flow/pkg/isotp"
-	"github.com/isaiah-harville/automotive-flow/pkg/uds"
+	"github.com/isaiah-harville/automotive/components/go/flowtypes"
+	"github.com/isaiah-harville/automotive/pkg/can"
+	"github.com/isaiah-harville/automotive/pkg/can/simbus"
+	"github.com/isaiah-harville/automotive/pkg/can/socketcan"
+	"github.com/isaiah-harville/automotive/pkg/isotp"
+	"github.com/isaiah-harville/automotive/pkg/uds"
 )
 
 // keepAliveInterval is how often TesterPresent is sent during

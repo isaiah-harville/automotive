@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/isaiah-harville/automotive-flow/pkg/can"
-	"github.com/isaiah-harville/automotive-flow/pkg/can/simbus"
-	"github.com/isaiah-harville/automotive-flow/pkg/isotp"
-	"github.com/isaiah-harville/automotive-flow/pkg/uds"
+	"github.com/isaiah-harville/automotive/pkg/can"
+	"github.com/isaiah-harville/automotive/pkg/can/simbus"
+	"github.com/isaiah-harville/automotive/pkg/isotp"
+	"github.com/isaiah-harville/automotive/pkg/uds"
 )
 
 // newRawTestClient returns a Client plus the raw ISO-TP connection an ECU

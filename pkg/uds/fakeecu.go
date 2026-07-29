@@ -4,7 +4,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/isaiah-harville/automotive-flow/pkg/isotp"
+	"github.com/isaiah-harville/automotive/pkg/isotp"
 )
 
 // FakeECU is a minimal scriptable UDS responder used for testing Client
