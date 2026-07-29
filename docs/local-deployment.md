@@ -5,6 +5,9 @@ There's no shared/plant Kubernetes cluster wired up for this repo yet. The
 can actually run the `flash-basic` pipeline end-to-end rather than just
 reading the YAML.
 
+For a direct start-to-results checklist, expected output, rerun steps, and
+troubleshooting, see [Run the Example Flashing Mission](example-mission.md).
+
 ## Prerequisites
 
 Open the repo in the devcontainer (VS Code "Reopen in Container", or any

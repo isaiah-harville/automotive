@@ -10,7 +10,7 @@ for automotive plant ECU flashing over CAN/UDS. Layering:
 ```text
 pkg/can      transport-agnostic CAN bus (Bus interface)
   simbus       in-process simulated bus + scriptable FakeECU (no hardware needed)
-  socketcan    real Linux SocketCAN — stub only, not implemented
+  socketcan    real Linux SocketCAN transport
 pkg/isotp    ISO-TP (ISO 15765-2) framing over can.Bus
 pkg/uds      UDS (ISO 14229) client built on pkg/isotp
 components/  Numaflow vertices (Go and Python) that call into pkg/

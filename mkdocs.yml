@@ -42,5 +42,6 @@ nav:
   - Component Library: components.md
   - Protocol Packages: protocol-packages.md
   - Configuration: configuration.md
+  - Example Flashing Mission: example-mission.md
   - Local Deployment: local-deployment.md
   - Readiness Audit: readiness-audit.md
