@@ -13,6 +13,10 @@ message shapes, see [Message Contracts](contracts.md).
 | `components/python/report-formatter` | Python (pynumaflow) | Mapper | Formats `FlashResult` JSON into a readable line |
 | `components/go/resultsink` | Go | Sink | Logs each report line |
 
+The example pipeline also runs a `deadlettersink` vertex using the
+`resultsink` image. Failed jobs bypass `report-formatter` and arrive there as
+`FlashDeadLetter` JSON containing both the original job and final result.
+
 `components/go/flowtypes` isn't a vertex — it's the shared Go struct
 definitions for `FlashJob`/`FlashResult` that `cansource`, `udsflasher`, and
 `resultsink` all import.
