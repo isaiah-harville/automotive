@@ -31,6 +31,9 @@ go test ./...
 Tests run against an in-process simulated ECU (`pkg/can/simbus` +
 `uds.FakeECU`) — no hardware or cluster required.
 
+To run the complete `flash-basic` mission in a local Numaflow cluster, follow
+[Run the Example Flashing Mission](docs/example-mission.md).
+
 To work on the docs site locally:
 
 ```sh
