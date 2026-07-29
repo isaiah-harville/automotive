@@ -8,7 +8,7 @@ package socketcan
 import (
 	"errors"
 
-	"github.com/isaiah-harville/automotive-flow/pkg/can"
+	"github.com/isaiah-harville/automotive/pkg/can"
 )
 
 // Open will dial a SocketCAN interface (e.g. "can0") once hardware is

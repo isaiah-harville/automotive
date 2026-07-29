@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/isaiah-harville/automotive-flow/pkg/can"
-	"github.com/isaiah-harville/automotive-flow/pkg/can/simbus"
+	"github.com/isaiah-harville/automotive/pkg/can"
+	"github.com/isaiah-harville/automotive/pkg/can/simbus"
 )
 
 func TestSendRecvRoundTrip(t *testing.T) {

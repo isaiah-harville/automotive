@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/isaiah-harville/automotive-flow/pkg/can"
+	"github.com/isaiah-harville/automotive/pkg/can"
 )
 
 // bus is one end of a simulated point-to-point CAN link.

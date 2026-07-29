@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/isaiah-harville/automotive-flow/pkg/isotp"
+	"github.com/isaiah-harville/automotive/pkg/isotp"
 )
 
 // Negative response codes relevant to the services implemented here.

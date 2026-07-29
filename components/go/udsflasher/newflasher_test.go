@@ -8,7 +8,7 @@ import (
 
 	"github.com/numaproj/numaflow-go/pkg/mapper"
 
-	"github.com/isaiah-harville/automotive-flow/components/go/flowtypes"
+	"github.com/isaiah-harville/automotive/components/go/flowtypes"
 )
 
 func TestNewFlasherUnknownModeErrors(t *testing.T) {
